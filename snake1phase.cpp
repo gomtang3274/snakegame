@@ -60,16 +60,22 @@ int main(){
 
     int curX = 10;
     int curY = 10;
+    int befX;
+    int befY;
+    int tail_X;
+    int tail_Y;
     int kp;
 
+    int snake[3][2] = {{8,10},{9,10},{10,10}}; 
+    int snakeSize = 3;
+
     attron(COLOR_PAIR(1));
-    move(curY,curX*2);
-    printw("  ");
 
 
-    for(int i=0; i<100; i++){
+    for(int i=0; i<500; i++){
         kp = getch();
-        snakeMap[curX][curY] = 0;
+        befX = curX;
+        befY = curY;
         switch(kp){
             case KEY_UP:
                 curX -= 1;
@@ -86,11 +92,26 @@ int main(){
             default:
                 break;
         }
-        snakeMap[curX][curY] = 4;
+        if(curX == 0 || curX == 20 || curY == 0 || curY == 20){
+            curX = befX;
+            curY = befY;
+        }
+        else{
+            snakeMap[snake[0][0]][snake[0][1]] = 0;
+            for(int i=0; i<snakeSize-1; i++){
+                snake[i][0] = snake[i+1][0];
+                snake[i][1] = snake[i+1][1];
+            }
+            snake[snakeSize-1][0] = curX;
+            snake[snakeSize-1][1] = curY;
+        }
+        for(int i=0; i<snakeSize-1; i++){
+            snakeMap[snake[i][0]][snake[i][1]] = 4;
+        }
+        snakeMap[snake[snakeSize-1][0]][snake[snakeSize-1][1]] = 3;
         clear();
         move(0,0);
         mapDrawing();
-        move(curY, curX*2);
     }
     
     
