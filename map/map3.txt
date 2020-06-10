@@ -1,3 +1,9 @@
+1 1 1 1
+4 u
+14 14
+15 14
+15 15
+14 15
 WwwwwwwwwwwwwwwwwwwwwwwwwwwwwW
 w                            w
 w                            w
@@ -12,8 +18,8 @@ w     w                w     w
 w     w                w     w
 w                            w
 w                            w
-w                            w
-w                            w
+w             Ss             w
+w             ss             w
 w                            w
 w                            w
 w     w                w     w

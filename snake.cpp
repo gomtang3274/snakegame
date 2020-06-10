@@ -213,8 +213,8 @@ void snakegame::startgame(int stage)
 
 void snakegame::makemap(int stage)
 {
-    std::string mapName = "map*.txt";
-    std::string wallposName = "wallpos*.txt";
+    std::string mapName = "map/map*.txt";
+    std::string wallposName = "map/wallpos*.txt";
     std::ifstream maptext;
 
     maptext.open(mapName.replace(3,1,std::to_string(stage)));
