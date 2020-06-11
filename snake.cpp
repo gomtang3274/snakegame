@@ -11,7 +11,15 @@ partpos::partpos()
 {
     x=y=0;
 }
-
+wall::wall(int col, int row, char dir){
+    x = col;
+    y = row;
+    open = dir;
+}
+wall::wall(){
+    x = y =0;
+    open = 'a';
+}
 snakegame::snakegame()
 {
     initscr();
@@ -38,7 +46,10 @@ snakegame::snakegame()
     init_pair(7,0,196);
         //관문색
     init_pair(8,0,129);
-
+    
+    attron(growthColor);
+    
+    /* 맵 만드는 과정
     partchar='x';
     oldalchar=(char)219;
     foo='*';
@@ -51,6 +62,7 @@ snakegame::snakegame()
     direction='l';
     srand(time(0));
     putGrowth();
+    //wall
     for(int i=0;i<gameWidth-1;i++)
     {
         move(0,i);
@@ -80,6 +92,7 @@ snakegame::snakegame()
     move(growthItem.y,growthItem.x);
     addch(foo);
     refresh();
+    */
 }
 snakegame::~snakegame()
 {
@@ -90,28 +103,17 @@ snakegame::~snakegame()
 
 void snakegame::putGrowth()
 {
-    bool isoverlap;
-    while(true)
+    srand(time(0));
+    int tmpx=rand()%(gameWidth-1)+1;
+    int tmpy=rand()%(gameHeight-1)+1;
+    while (gameMap[tmpy][tmpx]!='b')
     {
-        isoverlap = false;
-        int tmpx=rand()%gameWidth+1;
-        int tmpy=rand()%gameHeight+1;
-        for(int i=0;i<snakeBody.size();i++){
-            if(snakeBody[i].x==tmpx && snakeBody[i].y==tmpy)
-            {
-                isoverlap=true;
-                break;
-            }
-        }
-        if(isoverlap)
-            continue;
-        if(tmpx>gameWidth-3 ||tmpy>gameHeight-4){
-            continue;
-        }
-        growthItem.x=tmpx;
-        growthItem.y=tmpy;
-        break;
+        srand(time(0));
+        tmpx=rand()%(gameWidth-1)+1;
+        tmpy=rand()%(gameHeight-1)+1;
     }
+    growthItem.x=tmpx;
+    growthItem.y=tmpy;
     move(growthItem.y,growthItem.x);
     addch(foo);
     refresh();
@@ -189,21 +191,32 @@ void snakegame::movesnake()
 
 void snakegame::start()
 {
-    direction='u';
-    while(1)
-    {
-    movesnake();
-        if(collision())
+    while(gameOn){
+        switch (phase)
         {
-            move(12,36);
-            printw("game over");
+        case Menu:
+            /* 미구현 */
+            break;
+        
+        case inGame:
+            direction='u';
+            while(1)
+            {
+            movesnake();
+                if(collision())
+                {
+                    move(12,36);
+                    printw("game over");
+                    break;
+                }
+            if(direction=='q')
+                break;
+            usleep(timeDelay);
+            }
             break;
         }
-    
-    if(direction=='q')
-        break;
-    usleep(timeDelay);
     }
+    
 }
 
 void snakegame::startgame(int stage)
@@ -216,22 +229,35 @@ void snakegame::makemap(int stage)
     std::string mapName = "map/map*.txt";
     std::string wallposName = "map/wallpos*.txt";
     std::ifstream maptext;
+    int i,row,column,dir,txtcount, wallcount = 112;
 
-    maptext.open(mapName.replace(3,1,std::to_string(stage)));
+    maptext.open(mapName.replace(7,1,std::to_string(stage)));
+    maptext>>goalLength>>goalGrowth>>goalPoison>>goalGate;
+    maptext>>txtcount>>direction;
+    for(i =0;i<txtcount;i++){
+        maptext>>row>>column;
+        snakeBody.push_back(partpos(row,column));
+    }
     if(gameMap.size()){
-        for(int i =0;i<30;i++){
+        for(i =0;i<30;i++){
             std::getline(maptext,gameMap[i]);
         }
     }
     else{
         gameMap.resize(30);
-        for(int i =0;i<30;i++){
+        for(i =0;i<30;i++){
             std::getline(maptext,gameMap[i]);
         }
     }
     maptext.close();
-    //벽='w', 모서리='W', 빈공간='b', 성장='g', 독='p', 관문1='q', 관문2='Q'
-    
-
-
+    maptext.open(wallposName.replace(11,1,std::to_string(stage)));
+    walls.clear();
+    maptext>>txtcount;
+    wallcount+=txtcount;
+    walls.reserve(wallcount);
+    for(column=1;column<29;column++){
+        walls.push_back(wall());
+    }
+    maptext.close();
+    //벽='w', 모서리='W', 빈공간='b', 성장='g', 독='p', 관문1='q', 관문2='Q', 뱀머리='S', 뱀몸='s'
 }

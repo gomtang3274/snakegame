@@ -4,12 +4,17 @@
 #include <deque>
 #include <ncurses.h>
 #include <cstdlib>
+#include <ctime>
 #include <unistd.h>
 #include <vector>
 #ifndef SNAKE_H
 #define SNAKE_H
 
-
+//게임단계
+enum Phase{
+    Menu,
+    inGame
+};
 //요소들의 좌표값
 struct partpos{
     int x,y;
@@ -35,7 +40,7 @@ wall의 open이
 'd'이면 아래쪽으로 뚫림.
 */
 struct wall{
-    int x,y;
+    int y,x;
     char open;
     wall(int col, int row, char dir);
     wall();
@@ -44,7 +49,7 @@ struct wall{
 class snakegame{
     const int gameWidth = 30;
     const int gameHeight = 30;
-    const int timeDelay = 110000;
+    const int timeDelay = 1000000;
     const chtype blankColor = COLOR_PAIR(1);
     const chtype snakeHColor = COLOR_PAIR(2);
     const chtype snakeBColor = COLOR_PAIR(3);
@@ -54,19 +59,24 @@ class snakegame{
     const chtype poisonColor = COLOR_PAIR(7);
     const chtype gateColor = COLOR_PAIR(8);
 
-    
-    int snakeLength, growthPoints, poisonPoints, gatePoints;
+
+    Phase phase;
+    int snakeLength, growthPoints, poisonPoints, gatePoints, goalLength, goalGrowth, goalPoison, goalGate;
     char direction, partchar, oldalchar, foo;
-    bool gotGrowth, gotPoison;
+    bool gotGrowth, gotPoison, gameOn;
     partpos growthItem, poisonItem;
     wall gate1, gate2;
+
     std::vector <std::string> gameMap;
+
+
     std::vector <wall> walls;
     std::deque<partpos> snakeBody;
 
     void putGrowth();
     void putPoison();
     bool collision();
+
     void startgame(int stage);
     void makemap(int stage);
     void movesnake();
