@@ -13,7 +13,7 @@ struct partpos{
 };
 
 class snakegame{
-    int points, del, maxwidth, maxheight, checked, rItem, itemCnt;
+    int points, del, maxwidth, maxheight, checked, rItem, itemCnt, snakeLength, usingGate, eatFood, eatPoison;
     char direction, partchar, oldalchar, foo, poison;
     bool get;
     partpos growthItem, poisonItem, moveItem;
@@ -24,6 +24,7 @@ class snakegame{
     void putItem();
     bool collision();
     void movesnake();
+    void showpoint();
 public:
     snakegame();
     ~snakegame();
