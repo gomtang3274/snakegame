@@ -645,6 +645,7 @@ void snakegame::movesnake(){
     if(itemWhat == 0)   // 아이템을 먹지 않았을 경우
     {
         move(snakebody[snakebody.size()-1].y,snakebody[snakebody.size()-1].x);
+        gameMap[snakebody[snakebody.size()-1].y][snakebody[snakebody.size()-1].x]='b';
         attron(COLOR_PAIR(1));
         addch(' ');
         refresh();
@@ -652,26 +653,28 @@ void snakegame::movesnake(){
     }
     if(itemWhat == 2){  // 독약을 먹었을 경우
         move(snakebody[snakebody.size()-1].y,snakebody[snakebody.size()-1].x);
+        gameMap[snakebody[snakebody.size()-1].y][snakebody[snakebody.size()-1].x]='b';
         attron(COLOR_PAIR(1));
         addch(' ');
         refresh();
         snakebody.pop_back();
         move(snakebody[snakebody.size()-1].y,snakebody[snakebody.size()-1].x);
+        gameMap[snakebody[snakebody.size()-1].y][snakebody[snakebody.size()-1].x]='b';
         attron(COLOR_PAIR(1));
         addch(' ');
         refresh();
         snakebody.pop_back();
     }
-    if(itemCnt >= 80){      //일정시간이 지나면 자동으로 아이템 위치 변경
-        move(itemMove.y, itemMove.x);
-        attron(COLOR_PAIR(1));
-        addch(' ');
-        itemFood.x = 0;
-        itemFood.y = 0;
-        itemPoison.x = 0;
-        itemPoison.y = 0;
-        chooseItem();
-    }
+    // if(itemCnt >= 80){      //일정시간이 지나면 자동으로 아이템 위치 변경
+    //     move(itemMove.y, itemMove.x);
+    //     attron(COLOR_PAIR(1));
+    //     addch(' ');
+    //     itemFood.x = 0;
+    //     itemFood.y = 0;
+    //     itemPoison.x = 0;
+    //     itemPoison.y = 0;
+    //     chooseItem();
+    // }
     missionCheck();
     //관문1->관문2
     if(itemWhat == 3){
@@ -929,9 +932,11 @@ void snakegame::movesnake(){
     
     
     move(snakebody[0].y,snakebody[0].x);
+    gameMap[snakebody[0].y][snakebody[0].x]='S';
     attron(COLOR_PAIR(4));  //뱀머리
     addch(' ');
     move(snakebody[1].y,snakebody[1].x);
+    gameMap[snakebody[1].y][snakebody[1].x]='s';
     attron(COLOR_PAIR(5));  //뱀몸통
     addch(' ');
     refresh();
