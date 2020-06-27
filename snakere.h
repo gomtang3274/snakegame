@@ -9,14 +9,8 @@
 
 struct partpos{
     int x,y;
-    partpos(int col, int row);
+    partpos(int row, int col);
     partpos();
-};
-struct wall{
-    int y,x;
-    char open;
-    wall(int col, int row, char dir);
-    wall();
 };
 /*
 wall의 open이
@@ -36,30 +30,32 @@ wall의 open이
 'u'이면 위쪽, (방향 u로)
 'd'이면 아래쪽으로 뚫림. (방향 d로)
 */
+struct wall{
+    int y,x;
+    char open;
+    wall(int row, int col, char dir);
+    wall();
+};
 
 class snakegame{
-    const int gameWidth = 30;
-    const int gameHeight = 30;
-    const int timeDelay = 1000000;
-
-    int stage;
-    int gatePoints,goalGate;
-    int foodTime, poisonTime, gateTime, gameTime,gateTimer;
-    bool gameSuccess, gameOn, startGate;
+    const int maxwidth = 30;
+    const int maxheight = 30;
+    const int del = 30;
 
     //itemWhat=0일때 아무것도 안먹,1일때 성장, 2일때 독약, 3일때 2관문으로감, 4일때 1관문으로 감.
-    int points, del, itemWhat, itemRandom, itemCnt, snakeLength, eatFood, eatPoison, phase, scorephase;
-    int requiredFood, requiredPoison, requiredSize, requiredGate;
+    int points, itemWhat, itemRandom, itemCnt, snakeLength, eatFood, eatPoison, phase, scorephase;
+    int requiredFood, requiredPoison, requiredSize, requiredGate, gatePoint, ingateTime;
     char direction;
     bool show;
-    bool fExist, pExist, gExist, inGate;
-    bool mission1, mission2, missionF, missionP, missionS, missionG;
-
-    wall gate1, gate2;
+    bool gExist, inGate;
+    bool mission1, mission2, mission3, mission4, missionF, missionP, missionS, missionG,gameSuccess;
+    int errorchk;
+    
     partpos itemFood, itemPoison, itemMove;
-    std::deque<partpos> snakebody;
+    wall gate1, gate2;
+    std::deque<partpos> snake;
     std::vector<wall> walls;
-    std::string gameMap[30];//벽='w', 모서리='W', 빈공간='b', 성장='g', 독='p', 관문1='q', 관문2='Q', 뱀머리='S', 뱀몸='s'
+    std::string gameMap[30];//벽='w', 모서리='W', 빈공간='b', 성장='f', 독='p', 관문1='g', 관문2='G', 뱀머리='S', 뱀몸='s'
 
     void putFood();
     void putPoison();
@@ -68,9 +64,12 @@ class snakegame{
     bool collision();
     void movesnake();
     void showpoint();
+    //void map1(int y, int x);
+    //void map2(int y, int x);
+    //void mapDrawing();
+    void makeMap(int stage);
     void gameover();
     void missionCheck();
-    void makeMap(int stage);
 public:
     snakegame();
     ~snakegame();
