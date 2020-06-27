@@ -498,6 +498,7 @@ void snakegame::makeMap(int stage){
     itemWhat = 0;
     gExist = false;
     inGate = false;
+    gatePoint=0;
     gameSuccess = false;
     ingateTime = 0;
 
@@ -681,7 +682,7 @@ bool snakegame::collision()
             addch(' ');
             refresh();
             snake.pop_back();
-            errorchk=2;
+            errorchk=222;
             return true;
         }
     }

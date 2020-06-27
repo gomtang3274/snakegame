@@ -40,7 +40,7 @@ struct wall{
 class snakegame{
     const int maxwidth = 30;
     const int maxheight = 30;
-    const int del = 30;
+    const int del = 100000;
 
     //itemWhat=0일때 아무것도 안먹,1일때 성장, 2일때 독약, 3일때 2관문으로감, 4일때 1관문으로 감.
     int points, itemWhat, itemRandom, itemCnt, snakeLength, eatFood, eatPoison, phase, scorephase;
