@@ -108,16 +108,16 @@ void snakegame::makeMap(int stage){
         walls.clear();
         walls.reserve(112);
         for(column=1;column<29;column++){
-            walls.push_back(wall(0,column,'d'));
+            walls.push_back(wall(0,column,'r'));
         }
         for(column=1;column<29;column++){
-            walls.push_back(wall(29,column,'u'));
+            walls.push_back(wall(29,column,'d'));
         }
         for(row=1;row<29;row++){
-            walls.push_back(wall(row,0,'r'));
+            walls.push_back(wall(row,0,'l'));
         }
         for(row=1;row<29;row++){
-            walls.push_back(wall(row,29,'l'));
+            walls.push_back(wall(row,29,'u'));
         }
         mission1 = true;
         mission2 = mission3 = mission4 = false;
@@ -638,9 +638,9 @@ void snakegame::showpoint()
         }
         move(16,maxwidth);
         if(!missionG)
-            printw("   Size: \t %d/%d",gatePoint, requiredGate);
+            printw("   Gate: \t %d/%d",gatePoint, requiredGate);
         else{
-            printw("   Size: \t (V)");
+            printw("   Gate: \t (V)");
         }
     }
 }
@@ -655,13 +655,14 @@ bool snakegame::collision()
     else if(direction == 'd') Ymove = 1;
     for(int i=0;i<walls.size();i++){
         if(snake[0].x==walls[i].x &&snake[0].y==walls[i].y)
-            return true;
+            if((snake[0].x!=gate1.x||snake[0].y!=gate1.y)&&(snake[0].x!=gate2.x||snake[0].y!=gate2.y))
+                return true;
     }
     for(int i=2;i<snake.size();i++){
         if(snake[0].x==snake[i].x &&snake[0].y==snake[i].y)
             return true;
     }
-     if(snake[0].x==itemFood.x&&snake[0].y==itemFood.y){
+    if(snake[0].x==itemFood.x&&snake[0].y==itemFood.y){
         itemWhat=1;
         chooseItem();
         points+=15;
@@ -686,7 +687,7 @@ bool snakegame::collision()
             return true;
         }
     }
-    else if(gameMap[snake[0].x+Xmove][snake[0].y+Ymove]=='g'){
+    else if(snake[0].x==gate1.x&&snake[0].y==gate1.y){
         itemWhat = 3;
         inGate=true;
         points+=20;
@@ -694,7 +695,7 @@ bool snakegame::collision()
         move(maxheight-1,0);
         showpoint();
     }
-    else if(gameMap[snake[0].x+Xmove][snake[0].y+Ymove]=='G'){
+    else if(snake[0].x==gate2.x&&snake[0].y==gate2.y){
         itemWhat = 4;
         inGate = true;
         points+=20;
@@ -769,6 +770,27 @@ void snakegame::movesnake()
         chooseItem();
     }
     missionCheck();
+    if(!gExist)
+    {
+        putGate();
+        gExist=true;
+    }
+    if(inGate)
+    {
+        if(ingateTime<snake.size()+1)
+        ingateTime++;
+    else
+    {
+        attron(COLOR_PAIR(2));
+        move(gate1.y,gate1.x);
+        addch(' ');
+        move(gate2.y,gate2.x);
+        addch(' ');
+        gExist=false;
+        inGate=false;
+        ingateTime=0;
+    }
+    } 
     //관문1->관문2
     if(itemWhat == 3){
         switch (gate2.open)
@@ -981,12 +1003,12 @@ void snakegame::missionCheck(){
     if(requiredPoison == eatPoison)missionP = true;
     if(requiredSize == snakeLength)missionS = true;
     if(requiredGate == gatePoint) missionG=true;
-    if(missionF && missionP && missionS && missionG){
+    if(missionF && missionP && missionS){
         flushinp();
         nodelay(stdscr,false);
         points += 100;
         if(mission1){
-            move(17,maxwidth);
+            move(18,maxwidth);
             attron(COLOR_PAIR(11));
             printw("   Mission1 CLEAR!");
             gameSuccess = true;
@@ -1035,7 +1057,7 @@ void snakegame::gameover(){
     move(maxheight/2,maxwidth/2);
     printw("game over");
     move(maxheight/2+3,maxwidth/2);
-    printw("Point: %dp",errorchk);
+    printw("Point: %dp",points);
     attron(COLOR_PAIR(1));
     move(maxheight-2,maxwidth/2);
     printw("Press Any Button");
