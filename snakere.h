@@ -44,18 +44,15 @@ class snakegame{
 
     int stage;
     int gatePoints,goalGate;
-    int growthAmount, poisonAmount;
-    int growthTime, poisonTime, gateTime, gameTime;
-    char partchar, oldalchar, foo;
-    bool gameSuccess;
-    bool gotGrowth, gotPoison, gameOn;
-    bool makeGrowth, makePoison, makeGate;
+    int foodTime, poisonTime, gateTime, gameTime,gateTimer;
+    bool gameSuccess, gameOn, startGate;
 
-    //itemWhat
-    int points, del, maxwidth, maxheight, itemWhat, itemRandom, itemCnt, snakeLength, eatFood, eatPoison, phase, scorephase;
+    //itemWhat=0일때 아무것도 안먹,1일때 성장, 2일때 독약, 3일때 2관문으로감, 4일때 1관문으로 감.
+    int points, del, itemWhat, itemRandom, itemCnt, snakeLength, eatFood, eatPoison, phase, scorephase;
     int requiredFood, requiredPoison, requiredSize, requiredGate;
     char direction;
     bool show;
+    bool fExist, pExist, gExist, inGate;
     bool mission1, mission2, missionF, missionP, missionS, missionG;
 
     wall gate1, gate2;
@@ -66,13 +63,11 @@ class snakegame{
 
     void putFood();
     void putPoison();
+    void putGate();
     void chooseItem();
     bool collision();
     void movesnake();
     void showpoint();
-    void map1(int y, int x);
-    void map2(int y, int x);
-    void mapDrawing();
     void gameover();
     void missionCheck();
     void makeMap(int stage);

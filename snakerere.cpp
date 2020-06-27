@@ -61,6 +61,9 @@ void snakegame::makeMap(int stage){
     int row,column;
     if(stage==1)
     {
+        eatFood = 0;
+        eatPoison = 0;
+        snakeLength =3;
         requiredSize = 7;
         requiredFood = 4;
         requiredPoison = 3;
@@ -448,14 +451,70 @@ void snakegame::makeMap(int stage){
         walls.push_back(wall(15, 25, 'v'));
         walls.push_back(wall(15, 26, 'e'));
     }
+    for(row = 0;row<30;row++){
+        for(column=0;column<30;column++){
+            move(row,column);
+            switch (gameMap[row][column])
+            {
+            case 'b':
+                attron(COLOR_PAIR(1));
+                break;
+            case 'w':
+                attron(COLOR_PAIR(2));
+                break;
+            case 'W':
+                attron(COLOR_PAIR(3));
+                break;
+            case 'S':
+                attron(COLOR_PAIR(4));
+                break;
+            case 's':
+                attron(COLOR_PAIR(5));
+                break;
+            }
+            addch(' ');
+        }
+    }
+    missionF = false;
+    missionP = false;
+    missionS = false;
+    missionG = false;
+    gameSuccess = false;
+    foodTime = poisonTime =gateTimer= gateTime= gameTime =itemCnt = 0;
+    itemWhat = 0;
+    fExist = false;
+    pExist = false;
+    gExist = false;
+    inGate = false;
+    startGate = false;
+
 }
 
 void snakegame::gameover(){
     flushinp();
     nodelay(stdscr,false);
+    int windowH;
+    int windowW;
+    getmaxyx(stdscr, windowH, windowW);
+
+    for(int i=0; i<windowH; i++){
+        for(int j=0; j<windowW; j++){
+            attron(COLOR_PAIR(1));
+            move(i,j);
+            addch(' ');
+        }
+    }
     if(gameSuccess){
         //다음 스테이지로 이어갈 지 물어보기
-
+        
+        attron(COLOR_PAIR(10));
+        move(windowH/2,windowW/2);
+        printw("game over");
+        move(windowH/2+3,windowW/2);
+        printw("Point: %dp",points);
+        attron(COLOR_PAIR(1));
+        move(windowH-2,windowW/2);
+        printw("Press q to stop else to succeed");
         char weather = getch();
         if(weather = 'q'){
             gameOn = false;
@@ -466,7 +525,14 @@ void snakegame::gameover(){
     }
     else{
         //게임 다시 할지 물어보기
-
+        attron(COLOR_PAIR(10));
+        move(windowH/2,windowW/2);
+        printw("game over");
+        move(windowH/2+3,windowW/2);
+        printw("Point: %dp",points);
+        attron(COLOR_PAIR(1));
+        move(windowH-2,windowW/2);
+        printw("Press q to stop else to try again");
         char weather = getch();
         if(weather='q'){
             gameOn = false;
@@ -477,14 +543,14 @@ void snakegame::gameover(){
 
 void snakegame::start()
 {
-    direction='u';
     while(gameOn)
     {
         makeMap(stage);
+        
         while(1)
         {
             
-            if(collision())//여기에서 모든 충돌을 다룸 충돌 후 성공 혹은 실패시 true반환 아닐시 false
+            if(collision() || gameSuccess)//collision에서 모든 충돌을 다룸
             {
                 gameover();//성공 시 화면과 실패시 화면이 다르고 설정이 달라짐. 공통적으로 더 할지 물어보고 on을 바꿔줌
                 break;
@@ -515,7 +581,7 @@ bool snakegame::collision(){
         points+=15;
         snakeLength++;
         eatFood++;
-        move(maxheight-1,0);
+        move(gameHeight-1,0);
         showpoint();
     }
     else if(gameMap[snakebody[0].y+moveY][snakebody[0].x+moveX]=='p'){
@@ -524,7 +590,7 @@ bool snakegame::collision(){
         points+=10;
         snakeLength--;
         eatPoison++;
-        move(maxheight-1,0);
+        move(gameHeight-1,0);
         showpoint();
         if(snakebody.size() <= 3){
             move(snakebody[snakebody.size()-1].y,snakebody[snakebody.size()-1].x);
@@ -533,6 +599,16 @@ bool snakegame::collision(){
             snakebody.pop_back();
             return true;
         }
+    }
+    else if(gameMap[snakebody[0].y+moveY][snakebody[0].x+moveX]=='q'){
+        itemWhat = 3;
+        inGate = true;
+        gatePoints++;
+    }
+    else if(gameMap[snakebody[0].y+moveY][snakebody[0].x+moveX]=='Q'){
+        itemWhat = 4;
+        inGate = true;
+        gatePoints++;
     }
     else
     {
@@ -777,6 +853,80 @@ void snakegame::movesnake(){
             snakebody.push_front(partpos(snakebody[0].x,snakebody[0].y+1));
         }
     }
+    if(fExist)
+    {
+        if(foodTime<80)
+        {
+            foodTime++;
+        }
+        else
+        {
+            gameMap[itemFood.y][itemFood.x]='b';
+            move(itemFood.y,itemFood.x);
+            attron(COLOR_PAIR(1));
+            addch(' ');
+            putFood();
+        }
+        
+    }
+    else
+    {
+        putFood();
+    }
+    if(pExist)
+    {
+        if(poisonTime<80)
+        {
+            poisonTime++;
+        }
+        else
+        {
+            gameMap[itemPoison.y][itemPoison.x]='b';
+            move(itemPoison.y,itemPoison.x);
+            attron(COLOR_PAIR(1));
+            addch(' ');
+            putPoison();
+        }
+        
+    }
+    else
+    {
+        putPoison();
+    }
+    if(startGate)
+    {
+        if(!gExist)
+        {
+            putGate();
+        }
+    }
+    else
+    {
+        gateTime++;
+        if(gateTime>30)
+            startGate=true;
+    }
+    
+    
+    if(inGate)
+    {
+        if(gateTimer<snakebody.size())
+            gateTimer++;
+        else
+        {
+            gameMap[gate1.y][gate1.x]='w';
+            gameMap[gate2.y][gate2.x]='w';
+            gateTimer=0;
+            attron(COLOR_PAIR(2));
+            move(gate1.y,gate1.x);
+            addch(' ');
+            move(gate1.y,gate1.x);
+            addch(' ');
+            putGate();
+        }
+        
+    }
+    
     
     move(snakebody[0].y,snakebody[0].x);
     attron(COLOR_PAIR(4));  //뱀머리
@@ -796,60 +946,33 @@ void snakegame::missionCheck(){
     if(requiredSize == snakeLength){
         missionS = true;
     }
-    if(missionF && missionP && missionS){
+    if(requiredGate == gatePoints){
+        missionG=true;
+    }
+    if(missionF && missionP && missionS && missionG){
         points += 100;
-        if(mission1){
-            move(17,maxwidth);
-            attron(COLOR_PAIR(11));
-            printw("   Mission1 CLEAR!");
-            phase = 2;
-        }
-        else if(mission2){
-            move(18,maxwidth);
-            attron(COLOR_PAIR(12));
-            printw("   Mission2 CLEAR!");
-        }
+        gameSuccess = true;
         return;
     }
 }
 //아이템 - 음식
 void snakegame::putFood()
 {
-    bool replay;    //잘못된 위치 방지
-    while(true)
+    int tmpx=rand()%gameWidth;
+    int tmpy=rand()%gameHeight;
+    while(gameMap[tmpy][tmpx]!='b')
     {
-        replay = false;
-        int tmpx=rand()%maxwidth+1;
-        int tmpy=rand()%maxheight+1;
-        for(int i=0;i<snakebody.size();i++){
-            if(snakebody[i].x==tmpx && snakebody[i].y==tmpy)    //아이템 위치가 뱀과 겹쳤을 때
-            {
-                replay=true;
-                break;
-            }
-        }
-        for(int i=0;i<walls.size();i++){
-            if(walls[i].x==tmpx && walls[i].y==tmpy)      //아이템 위치가 벽과 겹쳤을 때
-            {
-                replay=true;
-                break;
-            }
-        }
-        if(replay)
-            continue;
-        if(tmpx>maxwidth-2 ||tmpy>maxheight-3){         //아이템 위치가 게임 화면을 벗어날 때
-            continue;
-        }
-
-        //아이템위치설정
-        itemFood.x=tmpx;
-        itemFood.y=tmpy;
-        itemPoison.x=0;
-        itemPoison.y=0;
-        itemMove.x=tmpx;
-        itemMove.y=tmpy;
-        break;
+        tmpx=rand()%gameWidth;
+        tmpy=rand()%gameHeight;
     }
+    gameMap[tmpy][tmpx]='g';
+    fExist = true;
+    //아이템위치설정
+    itemFood.x=tmpx;
+    itemFood.y=tmpy;
+    itemMove.x=tmpx;
+    itemMove.y=tmpy;
+        
     move(itemFood.y,itemFood.x);
     attron(COLOR_PAIR(6));
     addch(' ');
@@ -858,41 +981,42 @@ void snakegame::putFood()
 
 void snakegame::putPoison()
 {
-    bool replay;
-    while(true)
+    int tmpx=rand()%gameWidth;
+    int tmpy=rand()%gameHeight;
+    while(gameMap[tmpy][tmpx]!='b')
     {
-        replay = false;
-        int tmpx=rand()%maxwidth+1;
-        int tmpy=rand()%maxheight+1;
-        for(int i=0;i<snakebody.size();i++){
-            if(snakebody[i].x==tmpx && snakebody[i].y==tmpy)
-            {
-                replay=true;
-                break;
-            }
-        }
-        for(int i=0;i<walls.size();i++){
-            if(walls[i].x==tmpx && walls[i].y==tmpy)
-            {
-                replay=true;
-                break;
-            }
-        }
-        if(replay)
-            continue;
-        if(tmpx>maxwidth-2 ||tmpy>maxheight-3){
-            continue;
-        }
-        itemFood.x = 0;
-        itemFood.y = 0;
-        itemPoison.x=tmpx;
-        itemPoison.y=tmpy;
-        itemMove.x=tmpx;
-        itemMove.y=tmpy;
-        break;
+        tmpx=rand()%gameWidth;
+        tmpy=rand()%gameHeight;
     }
+    gameMap[tmpy][tmpx]='p';
+    pExist = true;
+
+    itemPoison.x=tmpx;
+    itemPoison.y=tmpy;
+    itemMove.x=tmpx;
+    itemMove.y=tmpy;
     move(itemPoison.y,itemPoison.x);
     attron(COLOR_PAIR(7)); //독
+    addch(' ');
+    refresh();
+}
+void snakegame::putGate()
+{
+    int gate1idx = rand()%walls.size();
+    int gate2idx = rand()%walls.size();
+    while(gate1idx!=gate2idx)
+        gate2idx = rand()%walls.size();
+    
+    gate1=wall(walls[gate1idx].x,walls[gate1idx].y,walls[gate1idx].open);
+    gate2=wall(walls[gate2idx].x,walls[gate2idx].y,walls[gate2idx].open);
+    gameMap[gate1.y][gate1.x]='q';
+    gameMap[gate2.y][gate2.x]='Q';
+    gExist = true;
+
+    attron(COLOR_PAIR(8));
+    move(gate1.y,gate1.x);
+    addch(' ');
+    move(gate2.y,gate2.x);
     addch(' ');
     refresh();
 }
@@ -913,48 +1037,50 @@ void snakegame::showpoint()
 {
     if(show){
         attron(COLOR_PAIR(9));
-        move(2,maxwidth);
+        move(2,gameWidth);
         printw("   YOUR SCORE  ");
-        move(3,maxwidth);
+        move(3,gameWidth);
         printw("   ------------");
-        move(4,maxwidth);
+        move(4,gameWidth);
         printw("   Point: \t %d",points);
-        move(5,maxwidth);
+        move(5,gameWidth);
         printw("   Food: \t %d",eatFood);
-        move(6,maxwidth);
+        move(6,gameWidth);
         printw("   Pois: \t %d",eatPoison);
-        move(7,maxwidth);
+        move(7,gameWidth);
         printw("   Size: \t %d",snakeLength);
-        move(8,maxwidth);
+        move(8,gameWidth);
         printw("   Gate: \t %d",gatePoints);
 
-        move(11,maxwidth);
+        move(11,gameWidth);
         printw("   MISSION%d  ",scorephase);
-        move(12,maxwidth);
+        move(12,gameWidth);
         printw("   ------------");
-        move(13,maxwidth);
+        move(13,gameWidth);
         if(!missionF)
             printw("   Food: \t %d/%d",eatFood, requiredFood);
         else{
             printw("   Food: \t (V)");
         }
-        move(14,maxwidth);
+        move(14,gameWidth);
         if(!missionP)
             printw("   Pois: \t %d/%d",eatPoison, requiredPoison);
         else{
             printw("   Pois: \t (V)");
         }
-        move(15,maxwidth);
+        move(15,gameWidth);
         if(!missionS)
             printw("   Size: \t %d/%d",snakeLength, requiredSize);
         else{
             printw("   Size: \t (V)");
         }
-        move(16,maxwidth);
+        move(16,gameWidth);
         if(!missionG)
             printw("   Gate: \t %d/%d",gatePoints, goalGate);
         else{
             printw("   Gate: \t (V)");
         }
+        move(17,gameWidth);
+        printw("   time: \t %d",gameTime/10);
     }
 }
